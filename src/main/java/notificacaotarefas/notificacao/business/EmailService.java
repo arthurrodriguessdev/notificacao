@@ -1,6 +1,7 @@
 package notificacaotarefas.notificacao.business;
 
 import lombok.RequiredArgsConstructor;
+import notificacaotarefas.notificacao.infraestructure.client.security.ProvedorToken;
 import org.springframework.beans.factory.annotation.Value;
 import notificacaotarefas.notificacao.business.dto.LoginDTO;
 import notificacaotarefas.notificacao.business.dto.TarefaDTO;
@@ -20,6 +21,7 @@ public class EmailService {
 
     private final TarefaClient tarefaClient;
     private final UsuarioClient usuarioClient;
+    private final ProvedorToken provedorToken;
 
     private String getTokenAutenticacao(){
         LoginDTO loginDados = LoginDTO.builder()
@@ -27,7 +29,9 @@ public class EmailService {
                 .email(emailContaServico)
                 .build();
 
-        return usuarioClient.login(loginDados).getBody();
+        String token = usuarioClient.login(loginDados).getBody();
+        provedorToken.setToken(token);
+        return token;
     }
 
     private String formatarToken(String token){
@@ -39,15 +43,23 @@ public class EmailService {
     }
 
     public void enviarEmail(){
+        String token = null;
+
+        // Evitando requisição desnecessária para obter token (guarda em memória)
+        if(provedorToken.tokenIsValid()){
+            token = provedorToken.getToken();
+        } else{
+            token = getTokenAutenticacao();
+        }
+
         LocalDateTime dataInicio = LocalDateTime.now();
         LocalDateTime dataFim = dataInicio.plusHours(1);
-
-        List<TarefaDTO> tarefas = tarefaClient.buscarTarefasPorIntervaloDatas(
-            dataInicio, dataFim, formatarToken(getTokenAutenticacao())
+        List<TarefaDTO> tarefasNotificar = tarefaClient.buscarTarefasPorIntervaloDatas(
+            dataInicio, dataFim, formatarToken(token)
         );
 
-        if(!tarefas.isEmpty()){
-            // Fazer a lógica de enviar o e-mail
+        if(!tarefasNotificar.isEmpty()){
+            System.out.println("nao");
         }
     }
 }
