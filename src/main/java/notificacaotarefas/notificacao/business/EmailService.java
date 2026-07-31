@@ -1,65 +1,71 @@
 package notificacaotarefas.notificacao.business;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import notificacaotarefas.notificacao.infraestructure.client.security.ProvedorToken;
-import org.springframework.beans.factory.annotation.Value;
-import notificacaotarefas.notificacao.business.dto.LoginDTO;
+import notificacaotarefas.notificacao.business.dto.CitacaoDTO;
 import notificacaotarefas.notificacao.business.dto.TarefaDTO;
-import notificacaotarefas.notificacao.infraestructure.client.TarefaClient;
-import notificacaotarefas.notificacao.infraestructure.client.UsuarioClient;
+import notificacaotarefas.notificacao.infraestructure.client.CitacaoClient;
+import notificacaotarefas.notificacao.infraestructure.exception.EmailException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.List;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    @Value("${email.contaservico}")
-    private String emailContaServico;
-    @Value("${password.contaservico}")
-    private String senhaContaServico;
+    @Value("${spring.mail.username}")
+    private String remetente;
+    @Value("${spring.mail.nomeRemetente}")
+    private String nomeRemetente;
+    @Value("${spring.client.key.citacao}")
+    private String keyApiCitacao;
 
-    private final TarefaClient tarefaClient;
-    private final UsuarioClient usuarioClient;
-    private final ProvedorToken provedorToken;
+    private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
+    private final CitacaoClient citacaoClient;
 
-    private String getTokenAutenticacao(){
-        LoginDTO loginDados = LoginDTO.builder()
-                .senha(senhaContaServico)
-                .email(emailContaServico)
-                .build();
+    public void enviarEmail(TarefaDTO tarefaDTO){
+        try{
+            MimeMessage mensagem = javaMailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
+                    mensagem, true, StandardCharsets.UTF_8.name());
 
-        String token = usuarioClient.login(loginDados).getBody();
-        provedorToken.setToken(token);
-        return token;
+            mimeMessageHelper.setFrom(new InternetAddress(remetente, nomeRemetente));
+            mimeMessageHelper.setTo(InternetAddress.parse(tarefaDTO.getEmailUsuario()));
+            mimeMessageHelper.setSubject("Notificação de Tarefa");
+            CitacaoDTO citacaoDTO = getCitacao();
+
+            // Setando variáveis do template
+            Context context = new Context();
+            context.setVariable("nomeTarefa", tarefaDTO.getNomeTarefa());
+            context.setVariable("dataEvento", tarefaDTO.getDataEvento());
+            context.setVariable("descricaoTarefa", tarefaDTO.getDescricaoTarefa());
+            context.setVariable("citacao", citacaoDTO.getQuote());
+            context.setVariable("autorCitacao", citacaoDTO.getAuthor());
+
+            String template = templateEngine.process("notificacao", context);
+            mimeMessageHelper.setText(template, true);
+            javaMailSender.send(mensagem);
+
+        } catch(EmailException e){
+            throw new EmailException("Erro ao enviar o e-mail.", e);
+        } catch(MessagingException e){
+            throw new EmailException("Erro ao montar a mensagem de e-mail.", e);
+        } catch(UnsupportedEncodingException e){
+            throw new EmailException("Erro na codificação.", e);
+        } catch(Exception e){
+            throw new EmailException("Erro inesperado.", e);
+        }
     }
 
-    private String formatarToken(String token){
-        if(!token.startsWith("Bearer")){
-            return "Bearer " + token;
-        }
-
-        return token;
-    }
-
-    public void enviarEmail(){
-        String token = null;
-
-        // Evitando requisição desnecessária para obter token (guarda em memória)
-        if(provedorToken.tokenIsValid()){
-            token = provedorToken.getToken();
-        } else{
-            token = getTokenAutenticacao();
-        }
-
-        LocalDateTime dataInicio = LocalDateTime.now();
-        LocalDateTime dataFim = dataInicio.plusHours(1);
-        List<TarefaDTO> tarefasNotificar = tarefaClient.buscarTarefasPorIntervaloDatas(
-            dataInicio, dataFim, formatarToken(token)
-        );
-
-        if(!tarefasNotificar.isEmpty()){
-            System.out.println("nao");
-        }
+    public CitacaoDTO getCitacao(){
+        return citacaoClient.buscarCitacao(keyApiCitacao).getFirst();
     }
 }
