@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: notificacao
+
+  cloud:
+    openfeign:
+      okhttp:
+        enabled: true
+
+  mail:
+    nomeRemetente: Arthur
+    host: smtp.gmail.com
+    port: 587
+    username:
+    password:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  client:
+    url:
+      citacao: https://api.api-ninjas.com
+    key:
+      citacao:
+
+  thymeleaf:
+    enable: true
+
+server:
+  port: 8082

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Notificação de Tarefa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        .header {
+            text-align: center;
+            color: #333;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #555;
+        }
+        .footer div{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+        .important {
+            font-weight: bold;
+            color: #d9534f;
+        }
+        .div-citacao{
+            margin-top: 30px;
+            padding: 15px;
+            background: #f7f7f7;
+            border-left: 5px solid #4CAF50;
+            border-radius: 5px;
+        }
+
+        .div-citacao p{
+            margin-top: 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Notificação de Tarefa</h1>
+    </div>
+    <div class="content">
+        <p>
+            <strong>AVISO:</strong> Sua tarefa
+            <span class="important" th:text="${nomeTarefa}">Nome da Tarefa</span>
+            está agendada para hoje às <span class="important" th:text="${dataEvento}">Horário</span>.
+        </p>
+        <p>
+            <strong>DESCRIÇÃO:</strong>
+            <span th:text="${descricaoTarefa}"></span>
+        </p>
+    </div>
+    <div class="footer">
+        <div class="div-citacao">
+            <span th:text="${citacao}">Citação</span>
+            <p>
+                <strong>— <span th:text="${autorCitacao}">Autor</span></strong>
+            </p>
+        </div>
+    </div>
+</div>
+</body>
+</html>
