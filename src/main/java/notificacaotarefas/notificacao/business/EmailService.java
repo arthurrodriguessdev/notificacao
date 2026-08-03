@@ -16,6 +16,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +45,11 @@ public class EmailService {
 
             // Setando variáveis do template
             Context context = new Context();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+            String dataEvento = formatter.format(tarefaDTO.getDataEvento());
+
             context.setVariable("nomeTarefa", tarefaDTO.getNomeTarefa());
-            context.setVariable("dataEvento", tarefaDTO.getDataEvento());
+            context.setVariable("dataEvento", dataEvento);
             context.setVariable("descricaoTarefa", tarefaDTO.getDescricaoTarefa());
             context.setVariable("citacao", citacaoDTO.getQuote());
             context.setVariable("autorCitacao", citacaoDTO.getAuthor());

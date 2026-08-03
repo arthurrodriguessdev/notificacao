@@ -24,7 +24,7 @@ spring:
     url:
       citacao: https://api.api-ninjas.com
     key:
-      citacao:
+      citacao: 7XH1W7DPtVYnFSX8YILnP6QHadBimWJEw21oS6eM
 
   thymeleaf:
     enable: true
