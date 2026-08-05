@@ -14,6 +14,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
@@ -58,14 +59,12 @@ public class EmailService {
             mimeMessageHelper.setText(template, true);
             javaMailSender.send(mensagem);
 
-        } catch(EmailException e){
-            throw new EmailException("Erro ao enviar o e-mail.", e);
-        } catch(MessagingException e){
+        } catch (MessagingException e) {
             throw new EmailException("Erro ao montar a mensagem de e-mail.", e);
-        } catch(UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             throw new EmailException("Erro na codificação.", e);
-        } catch(Exception e){
-            throw new EmailException("Erro inesperado.", e);
+        } catch (Exception e) {
+            throw new EmailException("Erro ao enviar o e-mail.", e);
         }
     }
 

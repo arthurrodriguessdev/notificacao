@@ -11,8 +11,8 @@ spring:
     nomeRemetente: Arthur
     host: smtp.gmail.com
     port: 587
-    username:
-    password:
+    username: arthurrodrigues1801r@gmail.com
+    password: vsrs ubsn mswl foxo
     properties:
       mail:
         smtp:
