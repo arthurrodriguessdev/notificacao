@@ -40,20 +40,20 @@ public class EmailService {
                     mensagem, true, StandardCharsets.UTF_8.name());
 
             mimeMessageHelper.setFrom(new InternetAddress(remetente, nomeRemetente));
-            mimeMessageHelper.setTo(InternetAddress.parse(tarefaDTO.getEmailUsuario()));
+            mimeMessageHelper.setTo(InternetAddress.parse(tarefaDTO.emailUsuario()));
             mimeMessageHelper.setSubject("Notificação de Tarefa");
             CitacaoDTO citacaoDTO = getCitacao();
 
             // Setando variáveis do template
             Context context = new Context();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String dataEvento = formatter.format(tarefaDTO.getDataEvento());
+            String dataEvento = formatter.format(tarefaDTO.dataEvento());
 
-            context.setVariable("nomeTarefa", tarefaDTO.getNomeTarefa());
+            context.setVariable("nomeTarefa", tarefaDTO.nomeTarefa());
             context.setVariable("dataEvento", dataEvento);
-            context.setVariable("descricaoTarefa", tarefaDTO.getDescricaoTarefa());
-            context.setVariable("citacao", citacaoDTO.getQuote());
-            context.setVariable("autorCitacao", citacaoDTO.getAuthor());
+            context.setVariable("descricaoTarefa", tarefaDTO.descricaoTarefa());
+            context.setVariable("citacao", citacaoDTO.quote());
+            context.setVariable("autorCitacao", citacaoDTO.author());
 
             String template = templateEngine.process("notificacao", context);
             mimeMessageHelper.setText(template, true);
