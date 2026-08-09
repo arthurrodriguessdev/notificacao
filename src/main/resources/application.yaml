@@ -1,33 +1,28 @@
 spring:
   application:
     name: notificacao
-
   cloud:
     openfeign:
       okhttp:
         enabled: true
-
   mail:
-    nomeRemetente: Arthur
-    host: smtp.gmail.com
-    port: 587
-    username: arthurrodrigues1801r@gmail.com
-    password: vsrs ubsn mswl foxo
+    nomeRemetente: ${NOME_REMETENTE_EMAIL_NOTIFICACAO}
+    host: ${HOST_EMAIL_NOTIFICACAO}
+    port: ${PORTA_EMAIL_NOTIFICACAO}
+    username: ${USERNAME_EMAIL_NOTIFICACAO}
+    password: ${PASSWORD_EMAIL_NOTIFICACAO}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-
   client:
     url:
-      citacao: https://api.api-ninjas.com
+      citacao: ${URL_API_CITACAO}
     key:
-      citacao: 7XH1W7DPtVYnFSX8YILnP6QHadBimWJEw21oS6eM
-
+      citacao: ${KEY_API_CITACAO}
   thymeleaf:
     enable: true
-
 server:
-  port: 8082
+  port: ${PORTA_NOTIFICACAO}
