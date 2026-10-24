@@ -28,34 +28,73 @@ public class EmailService {
     private String nomeRemetente;
     @Value("${spring.client.key.citacao}")
     private String keyApiCitacao;
-
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
     private final CitacaoClient citacaoClient;
 
-    public void enviarEmail(TarefaDTO tarefaDTO){
+    /**
+     * Envia um e-mail notificando o usuário sobre sua próxima tarefa.
+     *
+     * @param tarefaDTO dados da tarefa e informações do usuário destinatário
+     */
+    public void notificarProximaTarefa(TarefaDTO tarefaDTO){
+        Context context = getContextTarefa(tarefaDTO);
+        sendEmail(
+                tarefaDTO.emailUsuario(),
+                "Notificação de sua próxima tarefa!",
+                "notificacao",
+                context
+        );
+    }
+
+    /**
+     * Envia um e-mail confirmando a criação de uma tarefa.
+     * O envio ocorre automaticamente após a criação da tarefa, por meio de
+     * uma mensagem Kafka recebida do microserviço agendador de tarefas.
+     *
+     * @param tarefaDTO dados da tarefa e informações do usuário destinatário
+     */
+    public void notificarTarefaCriada(TarefaDTO tarefaDTO){
+        Context context = getContextTarefa(tarefaDTO);
+        sendEmail(
+                tarefaDTO.emailUsuario(),
+                "Criação de sua tarefa!",
+                "notificacao",
+                context
+        );
+    }
+
+    private Context getContextTarefa(TarefaDTO tarefaDTO){
+        Context context = new Context();
+        CitacaoDTO citacaoDTO = getCitacao();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String dataEvento = formatter.format(tarefaDTO.dataEvento());
+
+        context.setVariable("nomeTarefa", tarefaDTO.nomeTarefa());
+        context.setVariable("dataEvento", dataEvento);
+        context.setVariable("descricaoTarefa", tarefaDTO.descricaoTarefa());
+        context.setVariable("citacao", citacaoDTO.quote());
+        context.setVariable("autorCitacao", citacaoDTO.author());
+        return context;
+    }
+
+    private void sendEmail(
+            String emailEnviar,
+            String subject,
+            String templateName,
+            Context context
+    ){
         try{
             MimeMessage mensagem = javaMailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(
                     mensagem, true, StandardCharsets.UTF_8.name());
 
             mimeMessageHelper.setFrom(new InternetAddress(remetente, nomeRemetente));
-            mimeMessageHelper.setTo(InternetAddress.parse(tarefaDTO.emailUsuario()));
-            mimeMessageHelper.setSubject("Notificação de Tarefa");
-            CitacaoDTO citacaoDTO = getCitacao();
+            mimeMessageHelper.setTo(InternetAddress.parse(emailEnviar));
+            mimeMessageHelper.setSubject(subject);
 
-            // Setando variáveis do template
-            Context context = new Context();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-            String dataEvento = formatter.format(tarefaDTO.dataEvento());
-
-            context.setVariable("nomeTarefa", tarefaDTO.nomeTarefa());
-            context.setVariable("dataEvento", dataEvento);
-            context.setVariable("descricaoTarefa", tarefaDTO.descricaoTarefa());
-            context.setVariable("citacao", citacaoDTO.quote());
-            context.setVariable("autorCitacao", citacaoDTO.author());
-
-            String template = templateEngine.process("notificacao", context);
+            String template = templateEngine.process(templateName, context);
             mimeMessageHelper.setText(template, true);
             javaMailSender.send(mensagem);
 
@@ -63,12 +102,12 @@ public class EmailService {
             throw new EmailException("Erro ao montar a mensagem de e-mail.", e);
         } catch (UnsupportedEncodingException e) {
             throw new EmailException("Erro na codificação.", e);
-        } catch (Exception e) {
+        } catch(Exception e){
             throw new EmailException("Erro ao enviar o e-mail.", e);
         }
     }
 
-    public CitacaoDTO getCitacao(){
+    private CitacaoDTO getCitacao(){
         return citacaoClient.buscarCitacao(keyApiCitacao).getFirst();
     }
 }

@@ -17,7 +17,7 @@ public class NotificacaoController {
 
     @PostMapping
     public ResponseEntity<Void> enviarEmail(@RequestBody TarefaDTO tarefaDTO){
-        emailService.enviarEmail(tarefaDTO);
+        emailService.notificarProximaTarefa(tarefaDTO);
         return ResponseEntity.ok().build();
     }
 }
