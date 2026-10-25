@@ -12,12 +12,12 @@ import org.springframework.stereotype.Service;
 public class NotificacaoListener {
     private final EmailService emailService;
 
-    @KafkaListener(topics = "tarefa-criada", groupId = "notificacao-group")
+    @KafkaListener(
+            topics = "${app.kafka.topic.task-created}",
+            groupId = "${spring.kafka.consumer.group-id}"
+    )
     private void notificarTarefaCriada(TarefaDTO tarefaDTO){
-        log.warn("A criação da tarefa '{}' será notificada para o e-mail '{}'",
-                tarefaDTO.nomeTarefa(),
-                tarefaDTO.emailUsuario()
-        );
+        log.info("Evento de criação de tarefa recebido");
         emailService.notificarTarefaCriada(tarefaDTO);
     }
 }

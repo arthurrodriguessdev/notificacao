@@ -55,27 +55,41 @@ public class EmailService {
      * @param tarefaDTO dados da tarefa e informações do usuário destinatário
      */
     public void notificarTarefaCriada(TarefaDTO tarefaDTO){
-        Context context = getContextTarefa(tarefaDTO);
+        Context context = getContextTarefaCriada(tarefaDTO);
         sendEmail(
                 tarefaDTO.emailUsuario(),
                 "Criação de sua tarefa!",
-                "notificacao",
+                "tarefa-criada",
                 context
         );
     }
 
     private Context getContextTarefa(TarefaDTO tarefaDTO){
-        Context context = new Context();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        Context context = criarContextoTarefa(
+                tarefaDTO,
+                formatter.format(tarefaDTO.dataEvento())
+        );
         CitacaoDTO citacaoDTO = getCitacao();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        String dataEvento = formatter.format(tarefaDTO.dataEvento());
+        context.setVariable("citacao", citacaoDTO.quote());
+        context.setVariable("autorCitacao", citacaoDTO.author());
+        return context;
+    }
 
+    private Context getContextTarefaCriada(TarefaDTO tarefaDTO){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm");
+        return criarContextoTarefa(
+                tarefaDTO,
+                formatter.format(tarefaDTO.dataEvento())
+        );
+    }
+
+    private Context criarContextoTarefa(TarefaDTO tarefaDTO, String dataEvento){
+        Context context = new Context();
         context.setVariable("nomeTarefa", tarefaDTO.nomeTarefa());
         context.setVariable("dataEvento", dataEvento);
         context.setVariable("descricaoTarefa", tarefaDTO.descricaoTarefa());
-        context.setVariable("citacao", citacaoDTO.quote());
-        context.setVariable("autorCitacao", citacaoDTO.author());
         return context;
     }
 

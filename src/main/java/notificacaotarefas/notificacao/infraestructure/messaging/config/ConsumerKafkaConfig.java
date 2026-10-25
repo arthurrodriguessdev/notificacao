@@ -4,6 +4,7 @@ package notificacaotarefas.notificacao.infraestructure.messaging.config;
 import notificacaotarefas.notificacao.business.dto.TarefaDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -16,13 +17,17 @@ import java.util.Map;
 
 @Configuration
 public class ConsumerKafkaConfig {
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+    @Value("${spring.kafka.consumer.group-id}")
+    private String groupId;
 
     @Bean
     public ConsumerFactory<String, TarefaDTO> consumerFactory() {
         Map<String, Object> mapConfigs = new HashMap<>();
 
-        mapConfigs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        mapConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, "notificacao-group");
+        mapConfigs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        mapConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         mapConfigs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         return new DefaultKafkaConsumerFactory<>(
