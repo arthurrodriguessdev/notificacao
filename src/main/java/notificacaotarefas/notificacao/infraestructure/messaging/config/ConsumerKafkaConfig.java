@@ -23,13 +23,15 @@ public class ConsumerKafkaConfig {
 
         mapConfigs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         mapConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, "notificacao-group");
-        mapConfigs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        mapConfigs.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
-        mapConfigs.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, TarefaDTO.class.getName());
-        mapConfigs.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "notificacaotarefas.notificacao.business.dto");
         mapConfigs.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return new DefaultKafkaConsumerFactory<>(mapConfigs);
+        return new DefaultKafkaConsumerFactory<>(
+                mapConfigs,
+                new StringDeserializer(),
+                new JacksonJsonDeserializer<>(TarefaDTO.class)
+                        .trustedPackages("notificacaotarefas.notificacao.business.dto")
+                        .ignoreTypeHeaders()
+        );
     }
 
     @Bean
