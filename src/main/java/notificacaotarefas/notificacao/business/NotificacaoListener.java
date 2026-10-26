@@ -20,4 +20,13 @@ public class NotificacaoListener {
         log.info("Evento de criação de tarefa recebido");
         emailService.notificarTarefaCriada(tarefaDTO);
     }
+
+    @KafkaListener(
+        topics = "${app.kafka.topic.task-proxima}",
+        groupId = "${spring.kafka.consumer.group-id}"
+    )
+    private void notificarTarefaProxima(TarefaDTO tarefaDTO){
+        log.info("Evento de notificação de próxima tarefa recebido");
+        emailService.notificarProximaTarefa(tarefaDTO);
+    }
 }
