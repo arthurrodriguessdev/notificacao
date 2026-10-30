@@ -93,6 +93,14 @@ public class EmailService {
         return context;
     }
 
+    /**
+     * Método que faz, de fato, o envio do e-mail
+     *
+     * @param emailEnviar E-mail do usuário que será notificado
+     * @param subject Assunto do e-mail
+     * @param templateName Nome do template ".html" que será renderizado no e-mail
+     * @param context Conjunto de dados que serão setados no template passado
+     */
     private void sendEmail(
             String emailEnviar,
             String subject,

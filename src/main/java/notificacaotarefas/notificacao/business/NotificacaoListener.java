@@ -6,6 +6,14 @@ import notificacaotarefas.notificacao.business.dto.TarefaDTO;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+/**
+ * Listener responsável por consumir eventos relacionados às tarefas
+ * e acionar o envio das notificações por e-mail.
+ *
+ * <p>Consome eventos dos tópicos Kafka (produzido pelo serviço de agendador de tarefas)
+ * configurados para identificar a criação de novas tarefas e a proximidade de
+ * tarefas agendadas.</p>
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +30,7 @@ public class NotificacaoListener {
     }
 
     @KafkaListener(
-        topics = "${app.kafka.topic.task-proxima}",
+        topics = "${app.kafka.topic.next-task}",
         groupId = "${spring.kafka.consumer.group-id}"
     )
     private void notificarTarefaProxima(TarefaDTO tarefaDTO){
